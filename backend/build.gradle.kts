@@ -45,7 +45,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClassName = "carmen.application.web.MainApplication"
+    mainClassName = "ddd-hexagonal.DddHexagonalApplication"
 }
 
 
