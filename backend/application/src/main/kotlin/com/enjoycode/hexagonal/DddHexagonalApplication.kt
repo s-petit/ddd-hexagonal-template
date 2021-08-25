@@ -1,4 +1,4 @@
-package com.spetit.DddHexagonalApplication
+package com.enjoycode.hexagonal
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

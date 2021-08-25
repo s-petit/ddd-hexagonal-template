@@ -1,62 +1,112 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
+    id("com.diffplug.spotless")
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.spring")
-
-    id("org.springframework.boot")
+    jacoco
     // Apply the application plugin to add support for building a CLI application.
     application
 }
 
-repositories {
-    mavenCentral()
+val coverageExclusions = listOf(
+    "/**/com/vidal/nemo/application/**/*Config.*",
+    "/**/com/vidal/nemo/MainApplication.*"
+)
+
+jacoco {
+    toolVersion = "0.8.7"
+    reportsDirectory.set(file("$buildDir/customJacocoReportDir"))
 }
 
-dependencies {
-    // Align versions of all Kotlin components
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+val kotlinVersion = "${project.property("kotlin.version")}"
 
-    // Use the Kotlin JDK 8 standard library.
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+buildscript { repositories { mavenCentral() }}
 
-    // Use the Kotlin test library.
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+subprojects {
+    tasks {
+        apply(plugin = "org.jetbrains.kotlin.jvm")
+        apply(plugin = "jacoco")
+        apply(plugin = "com.diffplug.spotless")
 
-    // Use the Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+        withType(KotlinCompile::class) {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_11.toString()
+                kotlinOptions.allWarningsAsErrors = true
+            }
+        }
 
-    // REST
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3")
-    runtimeOnly("javax.servlet:javax.servlet-api:4.0.1")
-    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
+        withType(Test::class).configureEach {
+            maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
+            useJUnitPlatform()
+            systemProperty("junit.jupiter.testinstance.lifecycle.default", "per_class")
+        }
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.3.31")
-    testImplementation("org.assertj:assertj-core:3.12.2")
+        jacocoTestReport {
+            reports {
+                xml.required.set(false)
+                csv.required.set(false)
+                html.outputLocation.set(file("${buildDir}/jacocoHtml"))
+            }
+        }
 
+        withType(JacocoReport::class.java).named("jacocoTestReport") {
+            classDirectories.setFrom(files(classDirectories.files.map {
+                fileTree(it).apply {
+                    exclude(coverageExclusions)
+                }
+            }))
+        }
 
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
-application {
-    // Define the main class for the application.
-    mainClassName = "ddd-hexagonal.DddHexagonalApplication"
-}
-
-
-tasks {
-    withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_11.toString()
+        spotless {
+            kotlin {
+                ktlint().userData(
+                    mapOf("disabled_rules" to "import-ordering" // https://github.com/pinterest/ktlint/issues/527
+                    ))
+            }
+            kotlinGradle {
+                ktlint()
+            }
         }
     }
 
-    withType(Test::class).configureEach {
-        useJUnitPlatform()
+    dependencies {
+        implementation(kotlin("stdlib-jdk8"))
+        implementation("io.github.microutils:kotlin-logging:2.0.6")
+        implementation("org.slf4j:slf4j-api:1.7.30") { because("Required by kotlin-logging") }
+
+        // Unit Tests
+        testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
+        testImplementation("org.assertj:assertj-core:3.19.0")
+        testImplementation("io.mockk:mockk:1.11.0")
     }
+}
+
+val springModule: (String) -> (Boolean) = { module -> module == "application" || module == "infrastructure" }
+configure(subprojects.filter { springModule(it.name) }) {
+    apply(plugin = "io.spring.dependency-management")
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
+
+    dependencyManagement {
+
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:2.5.3")
+        }
+
+        dependencies {
+            dependency("org.springframework.boot:spring-boot-starter-test:2.5.3") {
+                exclude("org.junit.vintage:junit-vintage-engine")
+                exclude("org.assertj:assertj-core")
+                exclude("org.mockito:mockito-core")
+                exclude("org.mockito:mockito-junit-jupiter")
+            }
+        }
+    }
+
+    dependencies {
+        runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    }
+
 }
