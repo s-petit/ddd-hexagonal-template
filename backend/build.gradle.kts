@@ -45,16 +45,20 @@ subprojects {
             reports {
                 xml.required.set(false)
                 csv.required.set(false)
-                html.outputLocation.set(file("${buildDir}/jacocoHtml"))
+                html.outputLocation.set(file("$buildDir/jacocoHtml"))
             }
         }
 
         withType(JacocoReport::class.java).named("jacocoTestReport") {
-            classDirectories.setFrom(files(classDirectories.files.map {
-                fileTree(it).apply {
-                    exclude(coverageExclusions)
-                }
-            }))
+            classDirectories.setFrom(
+                files(
+                    classDirectories.files.map {
+                        fileTree(it).apply {
+                            exclude(coverageExclusions)
+                        }
+                    }
+                )
+            )
         }
     }
 
