@@ -65,7 +65,7 @@ tasks {
         outputs.dir(buildDir)
 
         command = "ng"
-        setArgs(listOf("build", "--output-path=${buildDir}", "--prod"))
+        setArgs(listOf("build", "--output-path=${buildDir}"))
         dependsOn(npmInstall)
         outputs.cacheIf { true }
     }

@@ -1,11 +1,10 @@
 package com.enjoycode.hexagonal.infrastructure.mongo
 
-import com.enjoycode.hexagonal.domain.MyCollection
+import com.enjoycode.hexagonal.domain.Employee
 
-data class MyCollectionMongo(
+data class EmployeeMongo(
     val id: String,
     val name: String
 ) {
-
-    fun toMyCollection() = MyCollection(id, name)
+    fun toEmployee() = Employee(id, name)
 }

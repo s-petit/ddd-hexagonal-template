@@ -22,8 +22,6 @@ jacoco {
 
 val kotlinVersion = "${project.property("kotlin.version")}"
 
-buildscript { repositories { mavenCentral() }}
-
 subprojects {
     tasks {
         apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -60,14 +58,14 @@ subprojects {
         }
 
         spotless {
-            kotlin {
+/*            kotlin {
                 ktlint().userData(
                     mapOf("disabled_rules" to "import-ordering" // https://github.com/pinterest/ktlint/issues/527
                     ))
             }
             kotlinGradle {
                 ktlint()
-            }
+            }*/
         }
     }
 
@@ -89,24 +87,14 @@ configure(subprojects.filter { springModule(it.name) }) {
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
 
-    dependencyManagement {
-
-        imports {
-            mavenBom("org.springframework.boot:spring-boot-dependencies:2.5.3")
-        }
-
-        dependencies {
-            dependency("org.springframework.boot:spring-boot-starter-test:2.5.3") {
-                exclude("org.junit.vintage:junit-vintage-engine")
-                exclude("org.assertj:assertj-core")
-                exclude("org.mockito:mockito-core")
-                exclude("org.mockito:mockito-junit-jupiter")
-            }
-        }
-    }
-
     dependencies {
         runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+        implementation(platform("org.springframework.boot:spring-boot-dependencies:2.5.3"))
+        implementation("org.springframework.boot:spring-boot-starter-test") {
+            exclude("org.junit.vintage:junit-vintage-engine")
+            exclude("org.assertj:assertj-core")
+            exclude("org.mockito:mockito-core")
+            exclude("org.mockito:mockito-junit-jupiter")
+        }
     }
-
 }

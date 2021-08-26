@@ -1,6 +1,6 @@
 package com.enjoycode.hexagonal.domain
 
-data class MyCollection(
+data class Employee(
     val id: String,
     val name: String
 )
