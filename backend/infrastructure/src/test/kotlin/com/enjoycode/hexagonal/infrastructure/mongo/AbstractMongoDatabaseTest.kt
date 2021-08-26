@@ -21,10 +21,10 @@ abstract class AbstractMongoDatabaseTest {
 
     companion object {
         private val mongoServer: GenericContainer<Nothing> = GenericContainer<Nothing>("mongo:" + "3.2.17")
-                .apply {
-                    withExposedPorts(27017)
-                    waitingFor(HostPortWaitStrategy())
-                }
+            .apply {
+                withExposedPorts(27017)
+                waitingFor(HostPortWaitStrategy())
+            }
 
         init {
             mongoServer.start()
@@ -32,11 +32,11 @@ abstract class AbstractMongoDatabaseTest {
 
         // Rewrite Database URL depending on container IP and Port before Spring initialization.
         internal class TestDatasourceContextInitializer :
-                ApplicationContextInitializer<ConfigurableApplicationContext> {
+            ApplicationContextInitializer<ConfigurableApplicationContext> {
 
             override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
                 TestPropertyValues.of(
-                        "spring.data.mongodb.uri=${mongoDbUri()}"
+                    "spring.data.mongodb.uri=${mongoDbUri()}"
                 ).applyTo(configurableApplicationContext.environment)
             }
         }

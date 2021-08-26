@@ -13,9 +13,8 @@ class EmployeeMongoRepository(private val collection: MongoCollection<EmployeeMo
     EmployeeRepository {
 
     override fun findById(id: String): Employee? =
-            collection.findOne(Employee::id eq id)?.toEmployee()
+        collection.findOne(Employee::id eq id)?.toEmployee()
 
     override fun save(employee: Employee) =
-            collection.save(EmployeeMongo(employee.id, employee.name))
-
+        collection.save(EmployeeMongo(employee.id, employee.name))
 }

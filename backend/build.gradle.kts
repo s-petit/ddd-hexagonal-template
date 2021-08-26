@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("com.diffplug.spotless")
+    id("org.jlleitschuh.gradle.ktlint")
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.spring")
     jacoco
@@ -26,7 +26,7 @@ subprojects {
     tasks {
         apply(plugin = "org.jetbrains.kotlin.jvm")
         apply(plugin = "jacoco")
-        apply(plugin = "com.diffplug.spotless")
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
         withType(KotlinCompile::class) {
             kotlinOptions {
@@ -55,17 +55,6 @@ subprojects {
                     exclude(coverageExclusions)
                 }
             }))
-        }
-
-        spotless {
-/*            kotlin {
-                ktlint().userData(
-                    mapOf("disabled_rules" to "import-ordering" // https://github.com/pinterest/ktlint/issues/527
-                    ))
-            }
-            kotlinGradle {
-                ktlint()
-            }*/
         }
     }
 

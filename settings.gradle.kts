@@ -9,7 +9,7 @@ include("backend:infrastructure")
 pluginManagement {
     val kotlinVersion = "${extra.properties["kotlin.version"]}"
     plugins {
-        id("com.diffplug.spotless") version "5.14.3"
+        id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
         id("com.github.node-gradle.node") version "2.2.1"
         id("io.spring.dependency-management") version "1.0.11.RELEASE"
         id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
